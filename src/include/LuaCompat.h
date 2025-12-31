@@ -220,6 +220,12 @@ int luaL_fileresult(lua_State* L, int stat, const char* fname);
             static_cast<lua_Unsigned>(luaL_optinteger(L, a, static_cast<lua_Integer>(d)))
     #endif
 
+    #ifndef lua_numbertointeger
+        #define lua_numbertointeger(n, p) \
+            ((n) >= LUA_MININTEGER && (n) <= LUA_MAXINTEGER && \
+             (*(p) = (lua_Integer)(n), true))
+    #endif
+
 #endif
 
 //---------------------------------------------------------------------------

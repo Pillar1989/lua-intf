@@ -332,7 +332,13 @@ public:
         { return luaL_newstate(); }
 
     static LuaState newState(lua_Alloc func, void* userdata = nullptr)
-        { return lua_newstate(func, userdata); }
+        {
+#if LUA_VERSION_NUM >= 505
+            return lua_newstate(func, userdata, 0);
+#else
+            return lua_newstate(func, userdata);
+#endif
+        }
 
     void close()
         { if (L) { lua_close(L); L = nullptr; } }
