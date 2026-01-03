@@ -478,6 +478,53 @@ struct LuaTypeMapping <T, typename std::enable_if<std::is_enum<T>::value>::type>
 //---------------------------------------------------------------------------
 
 /**
+ * Template specialization for nested containers (e.g., std::vector<std::vector<T>>)
+ * Enables recursive conversion between C++ nested vectors and Lua nested tables.
+ * 
+ * Note: Requires <vector> to be included and LUA_USING_LIST_TYPE to be defined first.
+ */
+#ifdef _GLIBCXX_VECTOR
+template<typename T>
+struct LuaTypeMapping<std::vector<std::vector<T>>, void>
+{
+    static void push(lua_State* L, const std::vector<std::vector<T>>& vv)
+    {
+        lua_createtable(L, static_cast<int>(vv.size()), 0);
+        for (size_t i = 0; i < vv.size(); ++i) {
+            // Recursively push inner vector using existing specialization
+            LuaTypeMapping<std::vector<T>>::push(L, vv[i]);
+            lua_rawseti(L, -2, static_cast<int>(i + 1));  // Lua 1-based indexing
+        }
+    }
+    
+    static std::vector<std::vector<T>> get(lua_State* L, int index)
+    {
+        if (!lua_istable(L, index)) {
+            luaL_error(L, "expected table for nested vector, got %s", lua_typename(L, lua_type(L, index)));
+        }
+        
+        std::vector<std::vector<T>> result;
+        int len = static_cast<int>(lua_rawlen(L, index));
+        result.reserve(len);
+        
+        for (int i = 1; i <= len; ++i) {
+            lua_rawgeti(L, index, i);
+            result.push_back(LuaTypeMapping<std::vector<T>>::get(L, -1));
+            lua_pop(L, 1);
+        }
+        return result;
+    }
+    
+    static std::vector<std::vector<T>> opt(lua_State* L, int index, const std::vector<std::vector<T>>& def)
+    {
+        return lua_isnoneornil(L, index) ? def : get(L, index);
+    }
+};
+#endif  // _GLIBCXX_VECTOR
+
+//---------------------------------------------------------------------------
+
+/**
  * Template for map container type
  */
 #define LUA_USING_MAP_TYPE_X(MAP, ...) \
