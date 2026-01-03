@@ -11,6 +11,53 @@ lua-intf
 
 `lua-intf` is inspired by [vinniefalco's LuaBridge](https://github.com/vinniefalco/LuaBridge) work, but has been rewritten to take advantage of C++11 features.
 
+## Quick Start
+
+```cpp
+#include "LuaIntf.h"
+
+using namespace LuaIntf;
+
+int main() {
+    lua_State* L = luaL_newstate();
+    luaL_openlibs(L);
+    
+    // Bind a simple function
+    LuaBinding(L).beginModule("Math")
+        .addFunction("add", [](int a, int b) { return a + b; })
+    .endModule();
+    
+    luaL_dostring(L, "print(Math.add(2, 3))");  // Prints: 5
+    
+    lua_close(L);
+    return 0;
+}
+```
+
+Compile with:
+```bash
+c++ -std=c++20 -I lua-intf/src/include -DLUAINTF_HEADERS_ONLY=1 main.cpp lua/liblua.a
+```
+
+## Comprehensive Documentation
+
+📚 **New Users**: Start with our complete guides in [tests/](tests/):
+
+- **[tests/USAGE_GUIDE.md](tests/USAGE_GUIDE.md)** - Complete usage guide with real examples
+- **[tests/README.md](tests/README.md)** - Test suite overview and quick start
+- **[tests/scripts/](tests/scripts/)** - 16 working test scripts
+- **[tests/src/](tests/src/)** - Complete module implementations
+
+🔬 **All Tests Passing**: 24+ edge cases, zero-copy TensorView, nested containers, and more.
+
+## Features & Modifications
+
+See **[MODIFICATIONS.md](MODIFICATIONS.md)** for:
+- All enhancements and fixes
+- Verified features list
+- Investigation results
+- Best practices
+
 Lua and C++ error handling
 --------------------------
 
