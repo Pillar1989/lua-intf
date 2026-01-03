@@ -55,7 +55,7 @@ test_basic: $(TEST_CLI)
 	@./$(TEST_CLI) scripts/test_len_metamethod.lua
 	@echo ""
 	@echo "[2/4] std::vector conversion"
-	@./$(TEST_CLI) scripts/test_vector_conversion.lua
+	@./$(TEST_CLI) scripts/test_vector_basic.lua
 	@echo ""
 	@echo "[3/4] In-place table mutation"
 	@./$(TEST_CLI) scripts/test_table_mutation.lua
@@ -71,13 +71,16 @@ test_advanced: $(PHASE2_CLI)
 	@echo "║           Advanced lua-intf Features                      ║"
 	@echo "╚════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@echo "[1/3] Zero-copy TensorView"
+	@echo "[1/4] Zero-copy TensorView"
 	@./$(PHASE2_CLI) scripts/test_tensor_view.lua
 	@echo ""
-	@echo "[2/3] Nested container conversion"
+	@echo "[2/4] Nested container conversion"
 	@./$(PHASE2_CLI) scripts/test_nested_containers.lua
 	@echo ""
-	@echo "[3/3] Edge cases and boundaries"
+	@echo "[3/4] Vector<Box> conversion (PostLib)"
+	@./$(PHASE2_CLI) scripts/test_vector_conversion_postlib.lua
+	@echo ""
+	@echo "[4/4] Edge cases (24 tests)"
 	@./$(PHASE2_CLI) scripts/test_edge_cases.lua | tail -8
 	@echo ""
 	@echo "✓ Advanced tests PASSED"

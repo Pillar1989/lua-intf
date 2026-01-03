@@ -106,16 +106,15 @@ bool consumeBoxTable(LuaRef boxes_table) {
     // Validate first box
     LuaRef first_box = boxes_table[1];
     
-    // Try to get as Box userdata
+    // Get Box object using lua-intf's proper method
     if (first_box.type() == LuaTypeID::USERDATA) {
-        Box* box_ptr = static_cast<Box*>(first_box.toPtr());
-        if (!box_ptr) return false;
+        Box box = first_box.toValue<Box>();
         
         // Validate values
-        if (box_ptr->x1 != 10 || box_ptr->y1 != 20 || 
-            box_ptr->x2 != 110 || box_ptr->y2 != 120 ||
-            std::abs(box_ptr->confidence - 0.9f) > 0.01f ||
-            box_ptr->class_id != 0) {
+        if (box.x1 != 10 || box.y1 != 20 || 
+            box.x2 != 110 || box.y2 != 120 ||
+            std::abs(box.confidence - 0.9f) > 0.01f ||
+            box.class_id != 0) {
             return false;
         }
     } else {
