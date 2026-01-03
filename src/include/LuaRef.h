@@ -1035,6 +1035,70 @@ public:
         return n;
     }
 
+    /**
+     * Remove element at index in table (sets to nil).
+     * Does not compact the table; use compact() after removal.
+     * Uses 1-based Lua indexing.
+     *
+     * @param i 1-based index to remove
+     */
+    void removeAt(int i)
+    {
+        rawset(i, LuaRef());  // Set to nil
+    }
+
+    /**
+     * Compact table by removing nil values and adjusting indices.
+     * After calling removeAt() multiple times, use this to shift elements
+     * down and reduce table length.
+     *
+     * This preserves the original table identity (modifies in-place).
+     */
+    void compact()
+    {
+        pushToStack();
+        int len = int(lua_rawlen(L, -1));
+        int write_idx = 1;
+        
+        // Shift non-nil elements to fill gaps
+        for (int read_idx = 1; read_idx <= len; ++read_idx) {
+            lua_rawgeti(L, -1, read_idx);
+            if (!lua_isnil(L, -1)) {
+                if (write_idx != read_idx) {
+                    // Move element from read_idx to write_idx
+                    lua_rawseti(L, -2, write_idx);
+                    
+                    // Clear old position
+                    lua_pushnil(L);
+                    lua_rawseti(L, -2, read_idx);
+                } else {
+                    // Element already in correct position
+                    lua_pop(L, 1);
+                }
+                write_idx++;
+            } else {
+                lua_pop(L, 1);
+            }
+        }
+        
+        lua_pop(L, 1);  // Pop table
+    }
+
+    /**
+     * Clear all elements from table (sets length to 0).
+     * Preserves the original table identity (modifies in-place).
+     */
+    void clearTable()
+    {
+        pushToStack();
+        int len = int(lua_rawlen(L, -1));
+        for (int i = 1; i <= len; ++i) {
+            lua_pushnil(L);
+            lua_rawseti(L, -2, i);
+        }
+        lua_pop(L, 1);
+    }
+
     bool has(char const * key) const {
         pushToStack();
         auto const tp = lua_getfield(L, -1, key);
@@ -1403,7 +1467,7 @@ inline LuaRef LuaRefValue(lua_State* L, std::nullptr_t)
 }
 
 #if LUAINTF_HEADERS_ONLY
-#include "src/LuaRef.cpp"
+#include "../LuaRef.cpp"
 #endif
 
 //---------------------------------------------------------------------------

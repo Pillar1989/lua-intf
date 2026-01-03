@@ -231,7 +231,7 @@ int luaL_fileresult(lua_State* L, int stat, const char* fname);
 //---------------------------------------------------------------------------
 
 #if LUAINTF_HEADERS_ONLY
-#include "src/LuaCompat.cpp"
+#include "../LuaCompat.cpp"
 #endif
 
 //---------------------------------------------------------------------------
