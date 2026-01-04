@@ -1118,15 +1118,19 @@ public:
      * @return true if field is available
      */
     template <typename K>
-    requires (!std::same_as<std::remove_reference_t<K>, std::string>)
+    // requires (!std::same_as<std::remove_reference_t<K>, std::string>)
     bool has(K && key) const
     {
-        pushToStack();
-        Lua::push(L, std::forward<K>(key));
-        lua_gettable(L, -2);
-        bool ok = !lua_isnoneornil(L, -1);
-        lua_pop(L, 2);
-        return ok;
+        if constexpr (std::is_same_v<std::remove_reference_t<K>, std::string>) {
+            return has(key.c_str());
+        } else {
+            pushToStack();
+            Lua::push(L, std::forward<K>(key));
+            lua_gettable(L, -2);
+            bool ok = !lua_isnoneornil(L, -1);
+            lua_pop(L, 2);
+            return ok;
+        }
     }
 
     template <typename V = LuaRef>
@@ -1151,15 +1155,19 @@ public:
      * @return field value
      */
     template <typename V = LuaRef, typename K>
-    requires (!std::same_as<std::remove_reference_t<K>, std::string>)
+    // requires (!std::same_as<std::remove_reference_t<K>, std::string>)
     V get(K && key) const
     {
-        pushToStack();
-        Lua::push(L, std::forward<K>(key));
-        lua_gettable(L, -2);
-        V t = Lua::get<V>(L, -1);
-        lua_pop(L, 2);
-        return t;
+        if constexpr (std::is_same_v<std::remove_reference_t<K>, std::string>) {
+            return get<V>(key.c_str());
+        } else {
+            pushToStack();
+            Lua::push(L, std::forward<K>(key));
+            lua_gettable(L, -2);
+            V t = Lua::get<V>(L, -1);
+            lua_pop(L, 2);
+            return t;
+        }
     }
 
     /**
