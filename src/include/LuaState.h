@@ -36,6 +36,7 @@
 #include <optional>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #if LUAINTF_STD_WIDE_STRING
 #include <locale>
